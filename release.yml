@@ -1,0 +1,64 @@
+# Release pipeline
+trigger:
+ tags:
+   include:
+     - 'v*'
+ branches:
+   exclude:
+     - master
+     - dev
+
+pool:
+  vmImage: windows-latest
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+
+  - task: gitversion/setup@1
+    inputs:
+      versionSpec: '5.x'
+
+  - task: gitversion/execute@1
+    inputs:
+      useConfigFile: true
+      configFilePath: GitVersion.yml
+
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
+
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: build
+      configuration: release
+      projects: '**/**.sln'
+
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: test
+      configuration: release
+      arguments: --no-restore
+      projects: '**/*Tests.csproj'
+
+  - task: DotNetCoreCLI@2
+    inputs: 
+      command: 'pack'
+      configuration: release      
+      arguments: --no-restore
+
+  - task: NuGetCommand@2
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg;!$(Build.ArtifactStagingDirectory)/*.Tests.nupkg'
+      nuGetFeedType: 'external'
+      publishFeedCredentials: 'AntlrODataCSharpNugetConnection'
+
+# - task: DotNetCoreCLI@2
+#    inputs:
+#      command: 'push'
+#      nuGetFeedType: external
+#      publishFeedCredentials: 'AntlrODataCSharpNugetConnection'
+#      searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg;!$(Build.ArtifactStagingDirectory)/*.Tests.nupkg'

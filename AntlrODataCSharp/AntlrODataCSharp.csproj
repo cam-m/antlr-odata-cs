@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <Nullable>disable</Nullable>
+        <PackageVersion />
+        <Title>Antlr4 Parser for OData - CSharp Target</Title>
+        <Authors>Cameron Maunder</Authors>
+        <PackageProjectUrl>https://github.com/users/cam-m/projects/2</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/cam-m/antlr-odata-csharp</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Antlr4.Runtime.Standard" Version="4.9.2" />
+      <PackageReference Include="Antlr4BuildTasks" Version="10.2.0">
+          <PrivateAssets>all</PrivateAssets>
+      </PackageReference>
+      <PackageReference Include="GitVersion.MsBuild" Version="5.10.3">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Antlr4 Include="OData4.g4">
+            <Listener>true</Listener>
+            <Visitor>true</Visitor>
+            <Package>AntlrODataCSharp.Grammar</Package>
+            <AntOutDir>$(ProjectDir)\Generated\Grammar</AntOutDir>
+        </Antlr4>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Generated\Grammar" />
+      <Folder Include="Lang.Edm\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="AntlrODataCSharp.csproj.DotSettings" />
+    </ItemGroup>
+
+</Project>

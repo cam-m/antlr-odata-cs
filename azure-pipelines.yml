@@ -1,0 +1,40 @@
+# Test Pipeline - only triggered on changes to dev
+trigger:
+ branches:
+   include:
+     - dev
+
+pool:
+  vmImage: windows-latest
+
+steps:
+  - checkout: self
+    fetchDepth: 0
+
+  - task: gitversion/setup@1
+    inputs:
+      versionSpec: '5.x'
+
+  - task: gitversion/execute@1
+    inputs:
+      useConfigFile: true
+      configFilePath: GitVersion.yml
+
+  - task: JavaToolInstaller@0
+    inputs:
+      versionSpec: '11'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
+
+  - task: NuGetAuthenticate@1
+
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: build
+      projects: '**/**.sln'
+
+  - task: DotNetCoreCLI@2
+    inputs:
+      command: test
+      arguments: --no-restore
+      projects: '**/*Tests.csproj'
